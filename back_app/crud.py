@@ -100,8 +100,8 @@ def delete_item(db: Session, item_id: int):
         return db_item
 
 
-def get_spaces(db: Session, skip: int = 0, limit: int = 100):
-    return db.query(models.Space).offset(skip).limit(limit).all()
+def get_spaces(db: Session, owner_id: int, skip: int = 0, limit: int = 100):
+    return db.query(models.Space).filter(models.Space.owner_id == owner_id).offset(skip).limit(limit).all()
 
 
 def get_space(db: Session, space_id):

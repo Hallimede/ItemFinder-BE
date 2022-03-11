@@ -109,9 +109,9 @@ def create_space_for_user(user_id: int, space: schemas.SpaceCreate, db: Session 
     return crud.create_user_space(db=db, space=space, user_id=user_id)
 
 
-@app.get("/spaces/", response_model=List[schemas.Space])
-def read_spaces(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
-    spaces = crud.get_spaces(db, skip=skip, limit=limit)
+@app.get("/spaces/{user_id}", response_model=List[schemas.Space])
+def read_spaces(user_id: int, skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
+    spaces = crud.get_spaces(db, owner_id=user_id, skip=skip, limit=limit)
     return spaces
 
 
