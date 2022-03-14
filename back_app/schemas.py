@@ -89,9 +89,9 @@ class UserUpdate(UserBase):
 class User(UserBase):
     id: int
     name: str
-    items: List[Item] = []
-    spaces: List[Space] = []
-    inventory: List[Inventory] = []
+    # items: List[Item] = []
+    # spaces: List[Space] = []
+    # inventory: List[Inventory] = []
 
     class Config:
         orm_mode = True

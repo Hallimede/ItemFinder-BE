@@ -197,8 +197,8 @@ def relate_user_inventory(db: Session, ivt_item: schemas.InventoryRelate, owner_
 #         return db_ivt_item
 
 
-def delete_inventory(db: Session, inventory_id: int):
-    db_ivt_item = db.query(models.Inventory).filter(models.Inventory.id == inventory_id).first()
+def delete_inventory(db: Session, item_id: int):
+    db_ivt_item = db.query(models.Inventory).filter(models.Inventory.item_id == item_id).first()
     if db_ivt_item:
         db.delete(db_ivt_item)
         db.commit()

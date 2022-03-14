@@ -152,9 +152,16 @@ def relate_inventory_for_user(user_id: int, ivt_item: schemas.InventoryRelate, d
     return crud.relate_user_inventory(db=db, ivt_item=ivt_item, owner_id=user_id)
 
 
-@app.delete('/ivt/{ivt_id}', response_model=schemas.Inventory)
-def delete_inventory(ivt_id: int, db: Session = Depends(get_db)):
-    db_ivt_item = crud.delete_inventory(db, inventory_id=ivt_id)
+# @app.delete('/ivt/{ivt_id}', response_model=schemas.Inventory)
+# def delete_inventory(ivt_id: int, db: Session = Depends(get_db)):
+#     db_ivt_item = crud.delete_inventory(db, inventory_id=ivt_id)
+#     if db_ivt_item is None:
+#         raise HTTPException(status_code=404, detail="Inventory not found")
+#     return db_ivt_item
+
+@app.delete('/ivt/{item_id}', response_model=schemas.Inventory)
+def delete_inventory(item_id: int, db: Session = Depends(get_db)):
+    db_ivt_item = crud.delete_inventory(db, item_id=item_id)
     if db_ivt_item is None:
         raise HTTPException(status_code=404, detail="Inventory not found")
     return db_ivt_item
