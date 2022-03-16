@@ -15,6 +15,17 @@ def get_users(db: Session, skip: int = 0, limit: int = 100):
     return db.query(models.User).offset(skip).limit(limit).all()
 
 
+def login(db: Session, log_in: schemas.UserLogin):
+    db_user = get_user_by_phone(db, log_in.phone_number)
+    res = schemas.LoginFeedback(user=schemas.User(phone_number=0, id=0, name=""), code=404, message="Login failed")
+    if db_user:
+        if db_user.password == log_in.password + "notreallyhashed":
+            res.user = db_user
+            res.code = 200
+            res.message = "Login successfully"
+    return res
+
+
 def create_user(db: Session, user: schemas.UserCreate):
     fake_hashed_password = user.password + "notreallyhashed"
     db_user = models.User(phone_number=user.phone_number, name=user.name, password=fake_hashed_password)
@@ -50,7 +61,7 @@ def delete_user(db: Session, user_id: int):
         return db_user
 
 
-def get_items(db: Session, owner_id : int, skip: int = 0, limit: int = 100):
+def get_items(db: Session, owner_id: int, skip: int = 0, limit: int = 100):
     return db.query(models.Item).filter(models.Item.owner_id == owner_id).offset(skip).limit(limit).all()
 
 

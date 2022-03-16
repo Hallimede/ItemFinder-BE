@@ -42,6 +42,14 @@ def read_user(user_id: int, db: Session = Depends(get_db)):
     return db_user
 
 
+@app.get("/login/", response_model=schemas.LoginFeedback)
+def login(log_in: schemas.UserLogin, db: Session = Depends(get_db)):
+    db_res = crud.login(db, log_in=log_in)
+    if db_res is None:
+        raise HTTPException(status_code=404, detail="Login failed")
+    return db_res
+
+
 @app.delete('/users/{user_id}', response_model=schemas.User)
 def delete_user(user_id: int, db: Session = Depends(get_db)):
     db_user = crud.delete_user(db, user_id=user_id)

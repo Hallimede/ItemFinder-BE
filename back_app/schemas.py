@@ -55,6 +55,7 @@ class InventoryBase(BaseModel):
 class InventoryRelate(InventoryBase):
     time: datetime = datetime.now()
 
+
 #
 # class InventoryUpdate(InventoryBase):
 #     time: datetime = datetime.now()
@@ -81,6 +82,10 @@ class UserCreate(UserBase):
     name: str
 
 
+class UserLogin(UserBase):
+    password: str
+
+
 class UserUpdate(UserBase):
     name: str = None
     password: str = None
@@ -89,9 +94,20 @@ class UserUpdate(UserBase):
 class User(UserBase):
     id: int
     name: str
-    # items: List[Item] = []
-    # spaces: List[Space] = []
-    # inventory: List[Inventory] = []
+    items: List[Item] = []
+    spaces: List[Space] = []
+    inventory: List[Inventory] = []
 
     class Config:
         orm_mode = True
+
+
+class LoginFeedback(BaseModel):
+    code: int
+    message: str
+    user: User
+
+    # def __init__(self, code, message):
+    #     super(LoginFeedback, self).__init__()
+    #     self.code = code
+    #     self.message = message
