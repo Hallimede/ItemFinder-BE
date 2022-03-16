@@ -42,7 +42,7 @@ def read_user(user_id: int, db: Session = Depends(get_db)):
     return db_user
 
 
-@app.get("/login/", response_model=schemas.LoginFeedback)
+@app.post("/login/", response_model=schemas.LoginFeedback)
 def login(log_in: schemas.UserLogin, db: Session = Depends(get_db)):
     db_res = crud.login(db, log_in=log_in)
     if db_res is None:
