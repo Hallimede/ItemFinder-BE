@@ -19,29 +19,71 @@ class ItemUpdate(ItemBase):
 class Item(ItemBase):
     id: int
     owner_id: int
-    position_id: int
+    # position_id: int
 
     class Config:
         orm_mode = True
 
 
-class SpaceBase(BaseModel):
+# class SpaceBase(BaseModel):
+#     name: str
+#     room: str
+#
+#
+# class SpaceCreate(SpaceBase):
+#     pass
+#
+#
+# class SpaceUpdate(SpaceBase):
+#     pass
+#
+#
+# class Space(SpaceBase):
+#     id: int
+#     owner_id: int
+#     items: List[Item] = []
+#
+#     class Config:
+#         orm_mode = True
+
+class RoomBase(BaseModel):
     name: str
-    room: str
 
 
-class SpaceCreate(SpaceBase):
+class RoomCreate(RoomBase):
     pass
 
 
-class SpaceUpdate(SpaceBase):
+class RoomUpdate(RoomBase):
     pass
 
 
-class Space(SpaceBase):
+class Room(RoomBase):
     id: int
+    name: str
     owner_id: int
-    items: List[Item] = []
+
+    class Config:
+        orm_mode = True
+
+
+class StorageSpaceBase(BaseModel):
+    room_id: int
+
+
+class StorageSpaceCreate(StorageSpaceBase):
+    name: str
+
+
+class StorageSpaceUpdate(StorageSpaceBase):
+    name: str
+
+
+class StorageSpace(StorageSpaceBase):
+    id: int
+    name: str
+    owner_id: int
+    room_id: int
 
     class Config:
         orm_mode = True
@@ -49,7 +91,8 @@ class Space(SpaceBase):
 
 class InventoryBase(BaseModel):
     item_id: int
-    space_id: int
+    room_id: int
+    storage_space_id: int
 
 
 class InventoryRelate(InventoryBase):
@@ -66,7 +109,8 @@ class Inventory(BaseModel):
     id: int
     owner_id: int
     item_id: int
-    space_id: int
+    room_id: int
+    storage_space_id: int
     time: datetime
 
     class Config:
@@ -94,6 +138,7 @@ class UserUpdate(UserBase):
 class User(UserBase):
     id: int
     name: str
+
     # items: List[Item] = []
     # spaces: List[Space] = []
     # inventory: List[Inventory] = []
@@ -102,12 +147,20 @@ class User(UserBase):
         orm_mode = True
 
 
+class UserAll(UserBase):
+    id: int
+    name: str
+    password: str
+
+    items: List[Item] = []
+    rooms: List[Room] = []
+    storage_spaces: List[StorageSpace] = []
+    inventory: List[Inventory] = []
+
+    class Config:
+        orm_mode = True
+
 class LoginFeedback(BaseModel):
     code: int
     message: str
     user: User
-
-    # def __init__(self, code, message):
-    #     super(LoginFeedback, self).__init__()
-    #     self.code = code
-    #     self.message = message
