@@ -1,4 +1,4 @@
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 
 from . import models, schemas
 
@@ -62,6 +62,13 @@ def get_items(db: Session, owner_id: int, skip: int = 0, limit: int = 100):
     return db.query(models.Item).filter(models.Item.owner_id == owner_id).offset(skip).limit(limit).all()
 
 
+def get_items_by_space(db: Session, owner_id: int, space: schemas.Space, skip: int = 0, limit: int = 100):
+    return db.query(models.Item).join(models.Inventory, models.Inventory.item_id == models.Item.id).filter(
+        models.Inventory.owner_id == owner_id).filter(
+        models.Inventory.room_id == space.room_id).filter(
+        models.Inventory.storage_space_id == space.storage_space_id).offset(skip).limit(limit).all()
+
+
 def get_item(db: Session, item_id):
     return db.query(models.Item).filter(models.Item.id == item_id).first()
 
@@ -119,6 +126,11 @@ def get_rooms(db: Session, owner_id: int, skip: int = 0, limit: int = 100):
 def get_storage_spaces(db: Session, owner_id: int, room_id: int, skip: int = 0, limit: int = 100):
     return db.query(models.StorageSpace).filter(models.StorageSpace.owner_id == owner_id).filter(
         models.StorageSpace.room_id == room_id).offset(skip).limit(limit).all()
+
+
+def get_user_all_storage_spaces(db: Session, owner_id: int, skip: int = 0, limit: int = 100):
+    return db.query(models.StorageSpace).filter(models.StorageSpace.owner_id == owner_id).offset(skip).limit(
+        limit).all()
 
 
 # def get_space(db: Session, space_id):
@@ -248,6 +260,16 @@ def get_inventory(db: Session, skip: int = 0, limit: int = 100):
     return db.query(models.Inventory).offset(skip).limit(limit).all()
 
 
+def get_inventory_by_item(db: Session, owner_id: int, item_id: int):
+    return db.query(models.Inventory).filter(models.Inventory.owner_id == owner_id).filter(
+        models.Inventory.item_id == item_id).first()
+
+
+def get_inventory_by_space(db: Session, owner_id: int, storage_space_id: int, skip: int = 0, limit: int = 100):
+    return db.query(models.Inventory).filter(models.Inventory.owner_id == owner_id).filter(
+        models.Inventory.storage_space_id == storage_space_id).offset(skip).limit(limit).all()
+
+
 def find_storage_space_in_room(db: Session, ivt_item: schemas.InventoryRelate, owner_id: int):
     return db.query(models.StorageSpace).filter(models.StorageSpace.owner_id == owner_id).filter(
         models.StorageSpace.id == ivt_item.storage_space_id).filter(
@@ -297,7 +319,8 @@ def relate_user_inventory(db: Session, ivt_item: schemas.InventoryRelate, owner_
 
 
 def delete_inventory(db: Session, item_id: int):
-    db_ivt_item = db.query(models.Inventory).filter(models.Inventory.item_id == item_id).first()
+    db_ivt_item = db.query(models.Inventory).options(joinedload('item')).options(joinedload('room')).options(
+        joinedload('storage_space')).filter(models.Inventory.item_id == item_id).first()
     if db_ivt_item:
         db.delete(db_ivt_item)
         db.commit()

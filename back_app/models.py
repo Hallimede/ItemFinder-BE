@@ -32,9 +32,10 @@ class Item(Base):
     owner_id = Column(Integer, ForeignKey("users.id"))
     unique = UniqueConstraint(name, owner_id)
     # position_id = Column(Integer, ForeignKey("spaces.id"))
-    # image = Column(String)
+    image = Column(String)
 
     owner = relationship("User", back_populates="items")
+    inventory = relationship("Inventory", back_populates="item")
 
     # position = relationship("Space", back_populates="items")
 
@@ -64,11 +65,12 @@ class Room(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     name = Column(String)
-    # image = Column(String)
+    image = Column(String)
     owner_id = Column(Integer, ForeignKey("users.id"))
     storage_spaces = relationship("StorageSpace", back_populates="position")
 
     owner = relationship("User", back_populates="rooms")
+    inventory = relationship("Inventory", back_populates="room")
 
     def to_dict(self):
         return {c.name: getattr(self, c.name) for c in self.__table__.columns}
@@ -80,11 +82,12 @@ class StorageSpace(Base):
     id = Column(Integer, primary_key=True, index=True)
     name = Column(String)
     room_id = Column(Integer, ForeignKey("rooms.id"))
-    # image = Column(String)
+    image = Column(String)
     owner_id = Column(Integer, ForeignKey("users.id"))
 
     owner = relationship("User", back_populates="storage_spaces")
     position = relationship("Room", back_populates="storage_spaces")
+    inventory = relationship("Inventory", back_populates="storage_space")
 
     def to_dict(self):
         return {c.name: getattr(self, c.name) for c in self.__table__.columns}
@@ -94,14 +97,18 @@ class Inventory(Base):
     __tablename__ = "inventory"
 
     id = Column(Integer, primary_key=True, index=True)
+    info = Column(String)
     owner_id = Column(Integer, ForeignKey("users.id"))
     item_id = Column(Integer, ForeignKey("items.id"))
     room_id = Column(Integer, ForeignKey("rooms.id"))
     storage_space_id = Column(Integer, ForeignKey("storage_spaces.id"))
     time = Column(DateTime)
 
-    unique = UniqueConstraint(room_id, storage_space_id, owner_id)
+    unique = UniqueConstraint(room_id, storage_space_id, owner_id, id)
     owner = relationship("User", back_populates="inventory")
+    item = relationship("Item", back_populates="inventory")
+    room = relationship("Room", back_populates="inventory")
+    storage_space = relationship("StorageSpace", back_populates="inventory")
 
     def to_dict(self):
         return {c.name: getattr(self, c.name) for c in self.__table__.columns}

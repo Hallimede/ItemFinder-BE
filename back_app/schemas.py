@@ -4,64 +4,32 @@ from datetime import datetime
 from pydantic import BaseModel
 
 
+class ItemQuery(BaseModel):
+    item_id: int
+
+
+class StorageSpaceQuery(BaseModel):
+    storage_space_id: int
+
+
 class ItemBase(BaseModel):
     name: str
 
 
 class ItemCreate(ItemBase):
-    pass
+    image: str = None
 
 
 class ItemUpdate(ItemBase):
-    pass
+    image: str = None
 
 
 class Item(ItemBase):
     id: int
     owner_id: int
+    image: str = None
+
     # position_id: int
-
-    class Config:
-        orm_mode = True
-
-
-# class SpaceBase(BaseModel):
-#     name: str
-#     room: str
-#
-#
-# class SpaceCreate(SpaceBase):
-#     pass
-#
-#
-# class SpaceUpdate(SpaceBase):
-#     pass
-#
-#
-# class Space(SpaceBase):
-#     id: int
-#     owner_id: int
-#     items: List[Item] = []
-#
-#     class Config:
-#         orm_mode = True
-
-class RoomBase(BaseModel):
-    name: str
-
-
-class RoomCreate(RoomBase):
-    pass
-
-
-class RoomUpdate(RoomBase):
-    pass
-
-
-class Room(RoomBase):
-    id: int
-    name: str
-    owner_id: int
 
     class Config:
         orm_mode = True
@@ -72,10 +40,12 @@ class StorageSpaceBase(BaseModel):
 
 
 class StorageSpaceCreate(StorageSpaceBase):
+    image: str = None
     name: str
 
 
 class StorageSpaceUpdate(StorageSpaceBase):
+    image: str = None
     name: str
 
 
@@ -84,6 +54,35 @@ class StorageSpace(StorageSpaceBase):
     name: str
     owner_id: int
     room_id: int
+    image: str = None
+
+    class Config:
+        orm_mode = True
+
+
+class Space(BaseModel):
+    room_id: int
+    storage_space_id: int
+
+
+class RoomBase(BaseModel):
+    name: str
+
+
+class RoomCreate(RoomBase):
+    image: str = None
+
+
+class RoomUpdate(RoomBase):
+    image: str = None
+
+
+class Room(RoomBase):
+    id: int
+    name: str
+    owner_id: int
+    image: str = None
+    storage_spaces: List[StorageSpace] = []
 
     class Config:
         orm_mode = True
@@ -97,6 +96,7 @@ class InventoryBase(BaseModel):
 
 class InventoryRelate(InventoryBase):
     time: datetime = datetime.now()
+    info: str = None
 
 
 #
@@ -112,6 +112,11 @@ class Inventory(BaseModel):
     room_id: int
     storage_space_id: int
     time: datetime
+    info: str = None
+
+    item: Item
+    room: Room
+    storage_space: StorageSpace
 
     class Config:
         orm_mode = True
@@ -159,6 +164,7 @@ class UserAll(UserBase):
 
     class Config:
         orm_mode = True
+
 
 class LoginFeedback(BaseModel):
     code: int

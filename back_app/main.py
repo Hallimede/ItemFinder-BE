@@ -1,7 +1,11 @@
+import hashlib
 from typing import List
-
+from pathlib import Path
+from fastapi import Request, File
 from fastapi import Depends, FastAPI, HTTPException
 from sqlalchemy.orm import Session
+from .extensions.logger import logger
+import time
 
 from . import crud, models, schemas
 from .database import SessionLocal, engine
@@ -9,6 +13,11 @@ from .database import SessionLocal, engine
 models.Base.metadata.create_all(bind=engine)
 
 app = FastAPI()
+
+LIMIT_SIZE = 5 * 1024 * 1024  # 5M
+# BASE_DIR = Path(__file__).resolve().parent
+# BASE_DIR = Path('/Users/hallimede/Documents/')
+BASE_DIR = Path('/root/images/')
 
 
 # Dependency
@@ -18,6 +27,40 @@ def get_db():
         yield db
     finally:
         db.close()
+
+
+@logger.catch  # 异常记录装饰器、放到下面好像不行、应该是异步的关系。
+def my_function(x, y, z):
+    return [x, y, z]
+
+
+@app.post('/')
+async def root(data: dict):
+    # get 请求
+    logger.debug(f"这是日志！")
+    logger.info('这是user接口：username={},当前时间戳为：{tiems}', data["username"], tiems=time.time())
+    my_function(0, 0)
+    return {'message': 'Hello World!'}
+
+
+@app.post("/upload/pic/", summary="上传图片")
+async def upload_image(request: Request, file: bytes = File(...)):
+    logger.debug(f"这是日志！")
+    logger.info('这是upload pic接口 {content}\nmethod ={method}\n当前时间戳为：{times}',
+                content=request.headers.get("content-type"),
+                method=request.method,
+                times=time.time())
+    if len(file) > LIMIT_SIZE:
+        raise HTTPException(status_code=400, detail="每个文件都不能大于5M")
+    name = hashlib.md5(file).hexdigest() + ".png"  # 使用md5作为文件名，以免同一个文件多次写入
+    path = "http://124.223.160.213/www"
+    # subpath = "www"
+    # if not (folder := BASE_DIR / subpath).exists():
+    #     await AsyncPath(folder).mkdir(parents=True)
+    # if not (fpath := folder / name).exists():
+    with open(BASE_DIR + name, 'wb') as f:
+        f.write(file)
+    return f"{path}/{name}"
 
 
 @app.post("/users/", response_model=schemas.User)
@@ -36,6 +79,9 @@ def read_users(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
 
 @app.get("/users/{user_id}", response_model=schemas.User)
 def read_user(user_id: int, db: Session = Depends(get_db)):
+    logger.debug(f"这是日志！")
+    logger.info('这是user接口：username={},当前时间戳为：{tiems}', user_id, tiems=time.time())
+    # my_function(0, 0)
     db_user = crud.get_user(db, user_id=user_id)
     if db_user is None:
         raise HTTPException(status_code=404, detail="User not found")
@@ -78,6 +124,13 @@ def create_item_for_user(user_id: int, item: schemas.ItemCreate, db: Session = D
 @app.get("/items/{user_id}", response_model=List[schemas.Item])
 def read_items(user_id: int, skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
     items = crud.get_items(db, owner_id=user_id, skip=skip, limit=limit)
+    return items
+
+
+@app.post("/items/{user_id}", response_model=List[schemas.Item])
+def read_items_by_space(user_id: int, space: schemas.Space, skip: int = 0, limit: int = 100,
+                        db: Session = Depends(get_db)):
+    items = crud.get_items_by_space(db, owner_id=user_id, space=space, skip=skip, limit=limit)
     return items
 
 
@@ -150,6 +203,12 @@ def read_rooms(user_id: int, skip: int = 0, limit: int = 100, db: Session = Depe
 
 
 @app.get("/storage_spaces/{user_id}", response_model=List[schemas.StorageSpace])
+def read_user_all_storage_spaces(user_id: int, skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
+    rooms = crud.get_user_all_storage_spaces(db, owner_id=user_id, skip=skip, limit=limit)
+    return rooms
+
+
+@app.post("/storage_spaces/{user_id}", response_model=List[schemas.StorageSpace])
 def read_storage_spaces(user_id: int, find: schemas.StorageSpaceBase, skip: int = 0, limit: int = 100,
                         db: Session = Depends(get_db)):
     rooms = crud.get_storage_spaces(db, owner_id=user_id, room_id=find.room_id, skip=skip, limit=limit)
@@ -193,7 +252,8 @@ def update_storage_space(storage_space_id: int, update_storage_space: schemas.St
     db_storage_space = crud.get_storage_space_by_id(db, storage_space_id)
     if db_storage_space is None:
         raise HTTPException(status_code=404, detail="Storage Space not found")
-    same_storage_space = crud.get_storage_space_by_name_and_room(db, owner_id=db_storage_space.owner_id, base_storage_space=update_storage_space)
+    same_storage_space = crud.get_storage_space_by_name_and_room(db, owner_id=db_storage_space.owner_id,
+                                                                 base_storage_space=update_storage_space)
     if same_storage_space:
         raise HTTPException(status_code=400, detail="Storage Space already registered")
     updated_storage_space = crud.update_storage_space(db, storage_space_id, update_storage_space)
@@ -247,6 +307,33 @@ def relate_inventory_for_user(user_id: int, ivt_item: schemas.InventoryRelate, d
 @app.delete('/ivt/{item_id}', response_model=schemas.Inventory)
 def delete_inventory(item_id: int, db: Session = Depends(get_db)):
     db_ivt_item = crud.delete_inventory(db, item_id=item_id)
+    if db_ivt_item is None:
+        raise HTTPException(status_code=404, detail="Inventory not found")
+    return db_ivt_item
+
+
+@app.post('/ivt/{user_id}', response_model=schemas.Inventory)
+def read_inventory_by_item(user_id: int, item: schemas.ItemQuery, skip: int = 0, limit: int = 100,
+                           db: Session = Depends(get_db)):
+    db_ivt_item = crud.get_inventory_by_item(db, owner_id=user_id, item_id=item.item_id)
+    if db_ivt_item is None:
+        raise HTTPException(status_code=404, detail="Item position not found")
+    return db_ivt_item
+
+
+@app.post('/ivt/space/{user_id}', response_model=List[schemas.Inventory])
+def read_inventory_by_space(user_id: int, space: schemas.StorageSpaceQuery, skip: int = 0, limit: int = 100,
+                            db: Session = Depends(get_db)):
+    db_ivt = crud.get_inventory_by_space(db, owner_id=user_id, storage_space_id=space.storage_space_id, skip=skip,
+                                         limit=limit)
+    if db_ivt is None:
+        raise HTTPException(status_code=404, detail="Inventory not found")
+    return db_ivt
+
+
+@app.get('/ivts/', response_model=List[schemas.Inventory])
+def read_inventory(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
+    db_ivt_item = crud.get_inventory(db, skip=skip, limit=limit)
     if db_ivt_item is None:
         raise HTTPException(status_code=404, detail="Inventory not found")
     return db_ivt_item

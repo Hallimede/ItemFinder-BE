@@ -32,7 +32,9 @@
     </connection>
   </component>
   <component name="DBNavigator.Project.DatabaseFileManager">
-    <open-files />
+    <open-files>
+      <object connection-id="9ba5ae36-7801-47a9-b5e3-af1256022e30" object-ref="consoles/Connection" />
+    </open-files>
   </component>
   <component name="DBNavigator.Project.DatabaseSessionManager">
     <connection id="9ba5ae36-7801-47a9-b5e3-af1256022e30" />
@@ -40,6 +42,7 @@
   <component name="DBNavigator.Project.DatasetFilterManager">
     <filter-actions connection-id="9ba5ae36-7801-47a9-b5e3-af1256022e30" dataset="main.users" active-filter-id="EMPTY_FILTER" />
     <filter-actions connection-id="9ba5ae36-7801-47a9-b5e3-af1256022e30" dataset="main.items" active-filter-id="EMPTY_FILTER" />
+    <filter-actions connection-id="9ba5ae36-7801-47a9-b5e3-af1256022e30" dataset="main.rooms" active-filter-id="" />
     <filter-actions connection-id="9ba5ae36-7801-47a9-b5e3-af1256022e30" dataset="main.spaces" active-filter-id="EMPTY_FILTER" />
     <filter-actions connection-id="9ba5ae36-7801-47a9-b5e3-af1256022e30" dataset="main.inventory" active-filter-id="EMPTY_FILTER" />
   </component>
