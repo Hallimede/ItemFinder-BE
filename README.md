@@ -7,3 +7,6 @@ In order to improve the recognition rate of elderly speech and minimize the proc
 The system is developed using the Android platform and is hosted on a cloud server using the FastAPI web framework. It is also improved with supplementary functions such as reminders, security verification, personalized interface, login, and registration to enhance the integrity of the system. The research work in this paper can effectively help the elderly to solve the problem of item storage management, which has great application value and market prospect.
 
 Key words: Aging-friendly; Item management; Android; Speech recognition
+
+
+Next time recall the latest origin commit
