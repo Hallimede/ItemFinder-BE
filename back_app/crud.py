@@ -114,11 +114,6 @@ def delete_item(db: Session, item_id: int):
         db.flush()
         return db_item
 
-
-# def get_spaces(db: Session, owner_id: int, skip: int = 0, limit: int = 100):
-#     return db.query(models.Space).filter(models.Space.owner_id == owner_id).offset(skip).limit(limit).all()
-
-
 def get_rooms(db: Session, owner_id: int, skip: int = 0, limit: int = 100):
     return db.query(models.Room).filter(models.Room.owner_id == owner_id).offset(skip).limit(limit).all()
 
@@ -133,21 +128,12 @@ def get_user_all_storage_spaces(db: Session, owner_id: int, skip: int = 0, limit
         limit).all()
 
 
-# def get_space(db: Session, space_id):
-#     return db.query(models.Space).filter(models.Space.id == space_id).first()
-
-
 def get_room_by_id(db: Session, room_id):
     return db.query(models.Room).filter(models.Room.id == room_id).first()
 
 
 def get_storage_space_by_id(db: Session, storage_space_id):
     return db.query(models.StorageSpace).filter(models.StorageSpace.id == storage_space_id).first()
-
-
-# def get_space_by_owner_name_and_room(db: Session, owner_id: int, space_name, space_room):
-#     return db.query(models.Space).filter(models.Space.owner_id == owner_id).filter(
-#         models.Space.name == space_name).filter(models.Space.room == space_room).first()
 
 
 def get_room_by_name(db: Session, owner_id: int, name):
@@ -158,14 +144,6 @@ def get_storage_space_by_name_and_room(db: Session, owner_id: int, base_storage_
     return db.query(models.StorageSpace).filter(models.StorageSpace.owner_id == owner_id).filter(
         models.StorageSpace.room_id == base_storage_space.room_id).filter(
         models.StorageSpace.name == base_storage_space.name).first()
-
-
-# def create_user_space(db: Session, space: schemas.SpaceCreate, user_id: int):
-#     db_space = models.Space(**space.dict(), owner_id=user_id)
-#     db.add(db_space)
-#     db.commit()
-#     db.refresh(db_space)
-#     return db_space
 
 
 def create_user_room(db: Session, room: schemas.RoomCreate, user_id: int):
@@ -182,27 +160,6 @@ def create_user_storage_space(db: Session, storage_space: schemas.StorageSpaceCr
     db.commit()
     db.refresh(db_room)
     return db_room
-
-
-# def relate_user_space(db: Session, user_id: int, space_id: int):
-#     db_space = db.query(models.Space).filter(models.Space.id == space_id).first()
-#     if db_space:
-#         db_space.owner_id = user_id
-#         db.commit()
-#         db.flush()
-#         return db.query(models.User).filter(models.User.id == user_id).first()
-
-
-# def update_space(db: Session, space_id: int, update_space: schemas.SpaceUpdate):
-#     db_space = db.query(models.Space).filter(models.Space.id == space_id).first()
-#     if db_space:
-#         update_dict = update_space.dict(exclude_unset=True)
-#         for k, v in update_dict.items():
-#             setattr(db_space, k, v)
-#         db.commit()
-#         db.flush()
-#         db.refresh(db_space)
-#         return db_space
 
 
 def update_room(db: Session, room_id: int, update_room: schemas.RoomUpdate):
@@ -227,15 +184,6 @@ def update_storage_space(db: Session, storage_space_id: int, update_storage_spac
         db.flush()
         db.refresh(db_storage_space)
         return db_storage_space
-
-
-# def delete_space(db: Session, space_id: int):
-#     db_space = db.query(models.Space).filter(models.Space.id == space_id).first()
-#     if db_space:
-#         db.delete(db_space)
-#         db.commit()
-#         db.flush()
-#         return db_space
 
 
 def delete_room(db: Session, room_id: int):
@@ -289,33 +237,7 @@ def relate_user_inventory(db: Session, ivt_item: schemas.InventoryRelate, owner_
             setattr(db_ivt_item, k, v)
         db.commit()
         db.flush()
-    # db_item = db.query(models.Item).filter(models.Item.id == db_ivt_item.item_id).first()
-    # db_item.position_id = db_ivt_item.space_id
-    # db.commit()
-    # db.refresh(db_ivt_item)
     return db_ivt_item
-
-
-# TODO: relate = create + update
-# def relate_user_inventory(db: Session, user_id: int, inventory_id: int):
-#     db_ivt_item = db.query(models.Inventory).filter(models.Inventory.id == inventory_id).first()
-#     if db_ivt_item:
-#         db_ivt_item.owner_id = user_id
-#         db.commit()
-#         db.flush()
-#         return db.query(models.User).filter(models.User.id == user_id).first()
-
-#
-# def update_inventory(db: Session, inventory_id: int, update_inventory: schemas.InventoryUpdate):
-#     db_ivt_item = db.query(models.Inventory).filter(models.Inventory.id == inventory_id).first()
-#     if db_ivt_item:
-#         update_dict = update_inventory.dict(exclude_unset=True)
-#         for k, v in update_dict.items():
-#             setattr(db_ivt_item, k, v)
-#         db.commit()
-#         db.flush()
-#         db.refresh(db_ivt_item)
-#         return db_ivt_item
 
 
 def delete_inventory(db: Session, item_id: int):

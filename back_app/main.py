@@ -134,12 +134,6 @@ def read_items_by_space(user_id: int, space: schemas.Space, skip: int = 0, limit
     return items
 
 
-# @app.put("/items/{user_id}/{item_id}/", response_model=schemas.User)
-# def relate_user_item(user_id: int, item_id: int, db: Session = Depends(get_db)):
-#     user = crud.relate_user_item(db=db, item_id=item_id, user_id=user_id)
-#     return user
-
-
 @app.put("/items/{item_id}", response_model=schemas.Item)
 def update_item(item_id: int, update_item: schemas.ItemUpdate, db: Session = Depends(get_db)):
     db_item = crud.get_item(db, item_id)
@@ -149,8 +143,6 @@ def update_item(item_id: int, update_item: schemas.ItemUpdate, db: Session = Dep
     if same_item:
         raise HTTPException(status_code=400, detail="Item already registered")
     updated_item = crud.update_item(db, item_id, update_item)
-    # if updated_item is None:
-    #     raise HTTPException(status_code=404, detail="Item not found")
     return updated_item
 
 
@@ -160,15 +152,6 @@ def delete_item(item_id: int, db: Session = Depends(get_db)):
     if db_item is None:
         raise HTTPException(status_code=404, detail="Item not found")
     return db_item
-
-
-# @app.post("/users/{user_id}/spaces/", response_model=schemas.Space)
-# def create_space_for_user(user_id: int, space: schemas.SpaceCreate, db: Session = Depends(get_db)):
-#     db_space = crud.get_space_by_owner_name_and_room(db, owner_id=user_id, space_name=space.name,
-#                                                      space_room=space.room)
-#     if db_space:
-#         raise HTTPException(status_code=400, detail="Space already registered")
-#     return crud.create_user_space(db=db, space=space, user_id=user_id)
 
 
 @app.post("/users/{user_id}/rooms/", response_model=schemas.Room)
@@ -190,12 +173,6 @@ def create_storage_space_for_user(user_id: int, storage_space: schemas.StorageSp
     return crud.create_user_storage_space(db=db, storage_space=storage_space, user_id=user_id)
 
 
-# @app.get("/spaces/{user_id}", response_model=List[schemas.Space])
-# def read_spaces(user_id: int, skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
-#     spaces = crud.get_spaces(db, owner_id=user_id, skip=skip, limit=limit)
-#     return spaces
-
-
 @app.get("/rooms/{user_id}", response_model=List[schemas.Room])
 def read_rooms(user_id: int, skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
     rooms = crud.get_rooms(db, owner_id=user_id, skip=skip, limit=limit)
@@ -213,25 +190,6 @@ def read_storage_spaces(user_id: int, find: schemas.StorageSpaceBase, skip: int 
                         db: Session = Depends(get_db)):
     rooms = crud.get_storage_spaces(db, owner_id=user_id, room_id=find.room_id, skip=skip, limit=limit)
     return rooms
-
-
-# @app.put("/items/{user_id}/{item_id}/", response_model=schemas.User)
-# def relate_user_item(user_id: int, item_id: int, db: Session = Depends(get_db)):
-#     user = crud.relate_user_item(db=db, item_id=item_id, user_id=user_id)
-#     return user
-
-
-# @app.put("/spaces/{space_id}", response_model=schemas.Space)
-# def update_space(space_id: int, update_space: schemas.SpaceUpdate, db: Session = Depends(get_db)):
-#     db_space = crud.get_space(db, space_id)
-#     if db_space is None:
-#         raise HTTPException(status_code=404, detail="Space not found")
-#     same_space = crud.get_space_by_owner_name_and_room(db, owner_id=db_space.owner_id, space_name=update_space.name,
-#                                                        space_room=update_space.room)
-#     if same_space:
-#         raise HTTPException(status_code=400, detail="Space already registered")
-#     updated_space = crud.update_space(db, space_id, update_space)
-#     return updated_space
 
 
 @app.put("/rooms/{room_id}", response_model=schemas.Room)
@@ -260,14 +218,6 @@ def update_storage_space(storage_space_id: int, update_storage_space: schemas.St
     return updated_storage_space
 
 
-# @app.delete('/spaces/{space_id}', response_model=schemas.Space)
-# def delete_space(space_id: int, db: Session = Depends(get_db)):
-#     db_space = crud.delete_space(db, space_id=space_id)
-#     if db_space is None:
-#         raise HTTPException(status_code=404, detail="Space not found")
-#     return db_space
-
-
 @app.delete('/rooms/{room_id}', response_model=schemas.Room)
 def delete_room(room_id: int, db: Session = Depends(get_db)):
     db_room = crud.delete_room(db, room_id=room_id)
@@ -287,22 +237,11 @@ def delete_storage_space(storage_space_id: int, db: Session = Depends(get_db)):
 # TODO: 可以为不存在的用户、item和空间创建
 @app.post("/users/{user_id}/ivt/", response_model=schemas.Inventory)
 def relate_inventory_for_user(user_id: int, ivt_item: schemas.InventoryRelate, db: Session = Depends(get_db)):
-    # db_space = crud.get_space_by_owner_name_and_room(db, owner_id=user_id, space_name=space.name,
-    #                                                  space_room=space.room)
-    # if db_space:
-    #     raise HTTPException(status_code=400, detail="Space already registered")
     db_storage_space = crud.find_storage_space_in_room(db=db, ivt_item=ivt_item, owner_id=user_id)
     if db_storage_space is None:
         raise HTTPException(status_code=404, detail="Storage Space not found in Room")
     return crud.relate_user_inventory(db=db, ivt_item=ivt_item, owner_id=user_id)
 
-
-# @app.delete('/ivt/{ivt_id}', response_model=schemas.Inventory)
-# def delete_inventory(ivt_id: int, db: Session = Depends(get_db)):
-#     db_ivt_item = crud.delete_inventory(db, inventory_id=ivt_id)
-#     if db_ivt_item is None:
-#         raise HTTPException(status_code=404, detail="Inventory not found")
-#     return db_ivt_item
 
 @app.delete('/ivt/{item_id}', response_model=schemas.Inventory)
 def delete_inventory(item_id: int, db: Session = Depends(get_db)):
